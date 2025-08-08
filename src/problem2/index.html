@@ -1,27 +1,175 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Problem 2 - CryptoSwap</title>
+      <link rel="stylesheet" href="style.css">
+      <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/bignumber.js/9.1.1/bignumber.min.js"></script>
+  </head>
+  <body>
+      <div class="app-container">
+          <!-- Header -->
+          <header class="app-header">
+              <div class="header-content">
+                  <div class="logo">
+                      <i class="fas fa-exchange-alt"></i>
+                      <h1>CryptoSwap</h1>
+                  </div>
+                  <div class="network-status">
+                      <div class="status-indicator online"></div>
+                      <span>Connected</span>
+                  </div>
+              </div>
+          </header>
 
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Fancy Form</title>
+          <!-- Main Swap Interface -->
+          <main class="swap-container">
+              <div class="swap-card">
+                  <div class="swap-header">
+                      <h2>Swap Tokens</h2>
+                      <p>Exchange one cryptocurrency for another</p>
+                  </div>
 
-  <!-- You may add more stuff here -->
-  <link href="style.css" rel="stylesheet" />
-</head>
+                  <!-- From Token Section -->
+                  <div class="token-input-section">
+                      <div class="section-label">
+                          <span>From</span>
+                          <div class="balance-info">
+                              <span>Balance: <span id="from-balance">0.00</span></span>
+                          </div>
+                      </div>
+                      
+                      <div class="token-input-container">
+                          <div class="token-selector" id="from-token-selector">
+                              <img id="from-token-icon" src="tokens/USDC.svg" alt="USDC" class="token-icon">
+                              <span id="from-token-symbol">USDC</span>
+                              <i class="fas fa-chevron-down"></i>
+                          </div>
+                          
+                          <div class="amount-input-container">
+                              <input 
+                                  type="number" 
+                                  id="input-amount" 
+                                  placeholder="0.00" 
+                                  class="amount-input"
+                                  step="0.000001"
+                                  min="0"
+                              >
+                              <button type="button" class="max-btn" id="max-from-btn">MAX</button>
+                          </div>
+                      </div>
+                  </div>
 
-<body>
+                  <!-- Swap Direction Button -->
+                  <div class="swap-direction">
+                      <button type="button" class="swap-direction-btn" id="swap-direction-btn">
+                          <i class="fas fa-arrow-down"></i>
+                      </button>
+                  </div>
 
-  <!-- You may reorganise the whole HTML, as long as your form achieves the same effect. -->
-  <form onsubmit="return !1">
-    <h5>Swap</h5>
-    <label for="input-amount">Amount to send</label>
-    <input id="input-amount" />
+                  <!-- To Token Section -->
+                  <div class="token-input-section">
+                      <div class="section-label">
+                          <span>To</span>
+                          <div class="balance-info">
+                              <span>Balance: <span id="to-balance">0.00</span></span>
+                          </div>
+                      </div>
+                      
+                      <div class="token-input-container">
+                          <div class="token-selector" id="to-token-selector">
+                              <img id="to-token-icon" src="tokens/ETH.svg" alt="ETH" class="token-icon">
+                              <span id="to-token-symbol">ETH</span>
+                              <i class="fas fa-chevron-down"></i>
+                          </div>
+                          
+                          <div class="amount-input-container">
+                              <input 
+                                  type="number" 
+                                  id="output-amount" 
+                                  placeholder="0.00" 
+                                  class="amount-input"
+                                  step="0.000001"
+                                  min="0"
+                                  readonly
+                              >
+                          </div>
+                      </div>
+                  </div>
 
-    <label for="output-amount">Amount to receive</label>
-    <input id="output-amount" />
+                  <!-- Exchange Rate Info -->
+                  <div class="exchange-info" id="exchange-info" style="display: none;">
+                      <div class="rate-info">
+                          <span>Exchange Rate:</span>
+                          <span id="exchange-rate">1 USDC = 0.0004 ETH</span>
+                      </div>
+                      <div class="price-impact">
+                          <span>Price Impact:</span>
+                          <span id="price-impact" class="impact-low">0.01%</span>
+                      </div>
+                  </div>
 
-    <button>CONFIRM SWAP</button>
-  </form>
-  <script src="script.js"></script>
-</body>
+                  <!-- Swap Button -->
+                  <button type="button" class="swap-button" id="swap-button" disabled>
+                      <span class="button-text">Enter an amount</span>
+                  </button>
 
+                  <!-- Loading States -->
+                  <div class="loading-overlay" id="loading-overlay" style="display: none;">
+                      <div class="loading-spinner"></div>
+                      <p>Processing swap...</p>
+                  </div>
+              </div>
+          </main>
+
+          <!-- Token Selection Modal -->
+          <div class="modal-overlay" id="token-modal" style="display: none;">
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <h3>Select Token</h3>
+                      <button type="button" class="modal-close" id="modal-close">
+                          <i class="fas fa-times"></i>
+                      </button>
+                  </div>
+                  
+                  <div class="search-container">
+                      <div class="search-input-wrapper">
+                          <i class="fas fa-search"></i>
+                          <input type="text" id="token-search" placeholder="Search tokens..." class="search-input">
+                      </div>
+                  </div>
+
+                  <div class="token-list" id="token-list">
+                      <!-- Tokens will be populated here -->
+                  </div>
+              </div>
+          </div>
+
+          <!-- Success Modal -->
+          <div class="modal-overlay" id="success-modal" style="display: none;">
+              <div class="modal-content success-modal">
+                  <div class="success-icon">
+                      <i class="fas fa-check-circle"></i>
+                  </div>
+                  <h3>Swap Successful!</h3>
+                  <p>Your tokens have been exchanged successfully.</p>
+                  <div class="transaction-details">
+                      <div class="detail-row">
+                          <span>Transaction Hash:</span>
+                          <span id="tx-hash">0x1234...5678</span>
+                      </div>
+                      <div class="detail-row">
+                          <span>Amount:</span>
+                          <span id="swap-amount">100 USDC → 0.04 ETH</span>
+                      </div>
+                  </div>
+                  <button type="button" class="close-success-btn" id="close-success-btn">Close</button>
+              </div>
+          </div>
+      </div>
+
+      <script src="script.js"></script>
+  </body>
 </html>
